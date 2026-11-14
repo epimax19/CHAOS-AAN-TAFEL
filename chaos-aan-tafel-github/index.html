@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHAOS AAN TAFEL 1.3 — Partygame</title>
+<style>
+:root{--bg:#100f20;--panel:#1b1930;--panel2:#25213e;--text:#f7f5ff;--muted:#b9b3d2;--pink:#ff4fa3;--purple:#9167ff;--cyan:#53d7e8;--line:#393452;--good:#62e6ad}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 15% 0%,#30204d 0,transparent 40%),radial-gradient(ellipse at 100% 20%,#162d49 0,transparent 35%),var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select{font:inherit}button{border:0;cursor:pointer;font-weight:750;transition:.15s transform,.15s opacity}button:hover{transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.wrap{max-width:1050px;margin:auto;padding:22px 16px 48px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}.brand{font-size:clamp(23px,4vw,34px);font-weight:1000;letter-spacing:-1.4px}.brand span{background:linear-gradient(90deg,var(--pink),#b58aff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}.tag{color:var(--muted);font-size:12px;letter-spacing:2px;font-weight:800}.pill{border:1px solid var(--line);padding:7px 11px;border-radius:99px;color:var(--muted);font-size:12px}
+.panel{background:linear-gradient(145deg,rgba(37,33,62,.96),rgba(25,23,43,.96));border:1px solid var(--line);border-radius:22px;padding:clamp(18px,4vw,28px);box-shadow:0 18px 60px #0004}
+h1,h2,h3,p{margin-top:0}h1{font-size:clamp(30px,6vw,52px);line-height:1.02;letter-spacing:-2px;margin-bottom:12px}h2{font-size:24px;letter-spacing:-.5px;margin-bottom:8px}.muted{color:var(--muted)}.lead{font-size:17px;color:#d5d0e7;max-width:650px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px;margin:16px 0}.field label{font-size:13px;color:var(--muted);font-weight:750}.field input,.field select{width:100%;background:#111020;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;outline:none}.field input:focus,.field select:focus{border-color:var(--purple)}
+.btn{padding:13px 18px;border-radius:13px;background:linear-gradient(100deg,var(--pink),var(--purple));color:white;box-shadow:0 8px 22px #8c54ff33}.btn.secondary{background:#302b49;border:1px solid #4b4569;box-shadow:none}.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);box-shadow:none}.btn.small{padding:8px 11px;font-size:13px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.player-chip{background:#302b49;border:1px solid #4b4569;border-radius:99px;padding:8px 12px;font-size:13px;display:flex;gap:8px;align-items:center}.player-chip button{background:none;color:#ff8bbd;padding:0;font-size:17px}
+.hidden{display:none!important}.hero{padding:32px 0 20px}.eyebrow{color:var(--cyan);font-size:12px;letter-spacing:2px;font-weight:900;margin-bottom:12px}.category-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.cat{border:1px solid var(--line);background:#17152a;border-radius:14px;padding:13px;text-align:left;color:var(--text)}.cat b{display:block;margin-bottom:4px}.cat span{font-size:12px;color:var(--muted)}.cat.active{border-color:var(--pink);background:#35213e;box-shadow:inset 0 0 0 1px var(--pink)}
+.gamehead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.turn{font-size:14px;color:var(--muted)}.turn strong{color:var(--text)}.scorelist{display:flex;gap:8px;overflow:auto;padding:3px 0 12px}.score{min-width:100px;background:#17152a;border:1px solid var(--line);padding:10px 12px;border-radius:13px}.score.current{border-color:var(--cyan);background:#172d3b}.score b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.score small{color:var(--muted)}
+.card{min-height:310px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(22px,6vw,50px);border-radius:22px;background:radial-gradient(circle at 15% 10%,#603b77,transparent 50%),linear-gradient(140deg,#282143,#171a35 70%);border:1px solid #5a4778;position:relative;overflow:hidden}.card:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff12;border-radius:50%;right:-100px;bottom:-140px;box-shadow:0 0 0 25px #ffffff08,0 0 0 50px #ffffff05}.cardcat{color:#ff9dce;font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}.prompt{font-size:clamp(23px,4vw,36px);font-weight:850;line-height:1.2;max-width:720px;letter-spacing:-.7px}.cardhint{color:#c4bddb;margin-top:17px;font-size:14px}.timer{font-size:24px;font-weight:900;color:var(--cyan);margin-top:16px}.footer{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}.notice{font-size:12px;color:var(--muted)}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#292442;border:1px solid #5d527f;padding:11px 16px;border-radius:12px;box-shadow:0 10px 30px #0008;z-index:10}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.rule{padding:14px;background:#17152a;border:1px solid var(--line);border-radius:14px}.rule b{display:block;margin-bottom:5px}.rule p{font-size:13px;color:var(--muted);margin:0}
+/* Extra party-effecten */
+body:before,body:after{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:-1;opacity:.32;background:radial-gradient(circle at 20% 30%,#ff4fa355 0 2px,transparent 3px),radial-gradient(circle at 70% 65%,#53d7e855 0 2px,transparent 3px),radial-gradient(circle at 85% 18%,#9167ff66 0 3px,transparent 4px);background-size:190px 170px,230px 210px,270px 240px;animation:floatGlow 18s linear infinite}
+body:after{opacity:.2;filter:blur(1px);animation-duration:27s;animation-direction:reverse}
+@keyframes floatGlow{from{transform:translate3d(0,0,0)}to{transform:translate3d(45px,-35px,0)}}
+.panel,.card,.cat,.score{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.panel{animation:panelIn .55s cubic-bezier(.2,.8,.2,1) both}
+@keyframes panelIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.card{animation:cardIn .42s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 14px 45px #9a55ff20}
+.card.card-pop{animation:cardPop .48s cubic-bezier(.15,.85,.25,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) rotateX(5deg) scale(.98)}to{opacity:1;transform:translateY(0) rotateX(0) scale(1)}}
+@keyframes cardPop{0%{transform:scale(.96) rotate(-.5deg);filter:brightness(1.35)}60%{transform:scale(1.015) rotate(.3deg)}100%{transform:scale(1) rotate(0);filter:brightness(1)}}
+.cat:hover{transform:translateY(-3px);box-shadow:0 8px 22px #0005}.cat.active{box-shadow:0 0 0 1px var(--pink),0 0 24px #ff4fa344}
+.btn:not(:disabled):active{transform:scale(.97)}
+.score.current{box-shadow:0 0 20px #53d7e833;animation:scorePulse 1.8s ease-in-out infinite}
+@keyframes scorePulse{50%{box-shadow:0 0 25px #53d7e855}}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:30;pointer-events:none;animation:confettiFall 2.7s ease-in forwards;border-radius:2px}
+@keyframes confettiFall{to{transform:translate3d(var(--drift),110vh,0) rotate(760deg);opacity:.1}}
+.toast{animation:toastIn .25s ease-out both}@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+
+/* Versie 1.3: betrouwbaardere speciale kaarten en geheime missies */
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.wheel-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#17152a;border:1px solid var(--line);padding:12px 14px;border-radius:16px;margin:0 0 16px}
+.wheel-holder{position:relative;width:76px;height:76px;flex:none}.wheel-holder:before{content:"▼";position:absolute;z-index:3;top:-14px;left:50%;transform:translateX(-50%);font-size:17px;color:#fff;text-shadow:0 2px 6px #0008;pointer-events:none}.wheel{width:76px;height:76px;border-radius:50%;border:4px solid #fff8;background:conic-gradient(#ff4fa3 0 51deg,#9167ff 51deg 102deg,#53d7e8 102deg 153deg,#62e6ad 153deg 204deg,#ffd166 204deg 255deg,#b58aff 255deg 306deg,#ff4fa3 306deg 360deg);box-shadow:0 0 22px #9167ff66;position:relative;transition:transform 1.35s cubic-bezier(.12,.72,.12,1);flex:none}
+.wheel:after{content:"";position:absolute;inset:27px;border-radius:50%;background:#17152a;border:2px solid #fff}
+.wheel.spinning{filter:brightness(1.25)}
+.special-tag{display:inline-block;margin-top:12px;padding:6px 10px;border-radius:99px;background:#3b2b58;color:#ffe08a;font-size:12px;font-weight:900;letter-spacing:.7px}
+.secret-box{display:none;margin-top:15px;padding:14px;border:1px dashed var(--cyan);border-radius:13px;background:#102b36;color:#e9fbff}
+.secret-box.show{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card-pop{animation:cardPop .42s cubic-bezier(.2,.8,.2,1)}
+@keyframes cardPop{0%{transform:scale(.96) rotate(-.6deg);opacity:.65}65%{transform:scale(1.015) rotate(.3deg)}100%{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+@media(max-width:650px){.grid{grid-template-columns:1fr}.category-grid{grid-template-columns:1fr 1fr}.rules{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.card{min-height:280px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div><div class="brand">CHAOS <span>AAN TAFEL</span></div><div class="tag">HET ULTIEME PARTY SPEL · VERSIE 1.3</div></div><div class="pill">2–12 SPELERS · NL</div></header>
+
+  <section id="setup" class="panel">
+    <div class="hero"><div class="eyebrow">🎉 WELKOM BIJ DE CHAOS</div><h1>Wie durft,<br>wie liegt en wie wint?</h1><p class="lead">Voeg je vrienden toe, kies de sfeer en laat de chaos beginnen. Eén telefoon is genoeg om samen te spelen.</p></div>
+    <div class="grid">
+      <div><h2>1. Wie doen er mee?</h2><div class="field"><label for="playerName">Naam van speler</label><div style="display:flex;gap:8px"><input id="playerName" placeholder="Bijv. Sam" maxlength="18"><button class="btn" id="addPlayer">Toevoegen</button></div></div><div id="playerList" class="players"><span class="muted">Voeg minimaal 2 spelers toe.</span></div><div class="notice">Je kunt 2 tot 12 spelers toevoegen.</div></div>
+      <div><h2>2. Kies de sfeer</h2><div class="field"><label for="mood">Spelniveau</label><select id="mood"><option value="mix">Mix van gezellig, gek en ondeugend</option><option value="family">Familieproof</option><option value="adult">18+ — ondeugender</option></select></div><div class="field"><label for="rounds">Aantal rondes</label><select id="rounds"><option value="10">10 rondes</option><option value="15" selected>15 rondes</option><option value="20">20 rondes</option><option value="0">Vrij spelen</option></select></div><p class="notice">Iedereen mag altijd passen. Spreek samen af wat oké is en houd het gezellig.</p></div>
+    </div>
+    <div class="actions"><button class="btn" id="start" disabled>Start CHAOS →</button><button class="btn secondary" id="demo">Vul demo-spelers in</button></div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="gamehead"><div><div class="eyebrow">RONDE <span id="roundNum">1</span></div><h2 id="turnTitle">Jij bent aan de beurt!</h2><div class="turn">Aan de beurt: <strong id="currentName"></strong></div></div><button class="btn ghost small" id="endGame">Spel stoppen</button></div>
+    <div id="scores" class="scorelist"></div>
+    <div class="category-grid" id="categories">
+      <button class="cat active" data-cat="random"><b>🎲 Verrassing</b><span>Alles door elkaar</span></button>
+      <button class="cat" data-cat="truth"><b>🫣 Truth or Dare</b><span>Waarheid of durven</span></button>
+      <button class="cat" data-cat="who"><b>👀 Wie van ons?</b><span>Stem op elkaar</span></button>
+      <button class="cat" data-cat="act"><b>🎭 Doe maar na</b><span>Uitbeelden en raden</span></button>
+      <button class="cat" data-cat="challenge"><b>⚡ Gekke opdracht</b><span>Durf jij het?</span></button>
+      <button class="cat" data-cat="bluff"><b>🤥 Bluffen</b><span>Waar of verzonnen?</span></button>
+      <button class="cat" data-cat="quiz"><b>🧠 Mini-quiz</b><span>Test je kennis</span></button>
+    </div>
+    <div class="tools">
+      <button class="btn secondary small" id="spinWheel">🎡 Draai het Rad van Chaos</button>
+      <button class="btn secondary small" id="specialDraw">✨ Trek speciale kaart</button>
+      <button class="btn ghost small" id="soundToggle" aria-pressed="true">🔊 Geluid: aan</button>
+    </div>
+    <div class="wheel-wrap">
+      <div class="wheel-holder"><div class="wheel" id="wheel" aria-label="Rad van Chaos"></div></div>
+      <div><strong>Rad van Chaos</strong><div class="notice" id="wheelResult" aria-live="polite">Draai aan het rad voor een willekeurige categorie.</div></div>
+    </div>
+    <div class="card"><div class="cardcat" id="cardCat">VERRASSING</div><div class="prompt" id="prompt">Druk op ‘Trek een kaart’ om de chaos te starten.</div><div class="cardhint" id="hint">Iedereen speelt mee. Veel plezier!</div>
+      <div class="secret-box" id="secretBox" aria-live="polite"><strong>🤫 Alleen voor jou</strong><div id="secretText"></div></div>
+      <div class="timer hidden" id="timer">00:30</div></div>
+    <div class="footer"><div class="notice" id="roundInfo">Kies een categorie en trek een kaart.</div><div class="actions" style="margin:0"><button class="btn secondary" id="skip">Overslaan</button><button class="btn" id="draw">Trek een kaart ✨</button></div></div>
+    <div class="actions" style="justify-content:center">
+      <button class="btn small secondary" id="award">+1 punt voor huidige speler</button>
+      <button class="btn small secondary" id="minus">-1 punt</button>
+      <button class="btn small secondary hidden" id="teamWin">Team krijgt +1 p.p.</button>
+      <button class="btn small secondary hidden" id="challengerWin">Uitdager +2 punten</button>
+      <button class="btn small ghost hidden" id="revealSecret">🤫 Toon geheime opdracht</button>
+      <button class="btn small secondary hidden" id="secretWin">Missie gelukt +2 punten</button>
+      <button class="btn small ghost hidden" id="missionFail">Missie niet gehaald</button>
+      <button class="btn small ghost" id="next">Volgende speler →</button>
+    </div>
+  </section>
+
+  <section id="results" class="panel hidden">
+    <div class="eyebrow">🏆 EINDE VAN HET SPEL</div><h1 id="winner">De winnaar!</h1><p class="lead">De chaos is voorbij. Dit is de eindstand:</p><div id="finalScores"></div><div class="actions"><button class="btn" id="again">Nog een potje</button><button class="btn secondary" id="home">Terug naar start</button></div>
+  </section>
+  <section class="rules"><div class="rule"><b>🎯 Doel</b><p>Verzamel punten met opdrachten, goede antwoorden en creatieve acties.</p></div><div class="rule"><b>🤝 Samen spelen</b><p>Stem, raad en lach samen. Geen telefoons nodig behalve die waarop het spel draait.</p></div><div class="rule"><b>🛟 Veilig & gezellig</b><p>Iedereen mag een kaart overslaan. Geen druk, geen gevaarlijke opdrachten.</p></div></section>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const decks={
+truth:[
+["Waarheid","Wat is het gênantste dat je ooit op een feestje hebt gedaan?","Vertel eerlijk. De groep mag één vervolgvraag stellen."],
+["Durven","Doe 15 seconden alsof je de grootste popster ter wereld bent.","De groep bepaalt het applaus."],
+["Waarheid","Wie aan tafel kan jou het hardst aan het lachen maken? Waarom?","Noem iemand en geef een reden."],
+["Durven","Geef de persoon links van je een overdreven compliment.","Maak het zo dramatisch mogelijk."],
+["Waarheid","Wat is een kleine leugen die je ooit hebt verteld?","Hou het gezellig."],
+["Durven","Zing het refrein van een liedje alsof je auditie doet.","De groep mag het nummer raden."],
+["Waarheid","Wat was je eerste indruk van iemand aan tafel?","Kies iemand die het leuk vindt om dit te horen."],
+["Durven","Praat de volgende beurt met een zelfgekozen accent.","Blijf in je rol."]
+],
+who:[
+["Wie van ons?","Wie zou het snelst verdwalen met Google Maps aan?","Iedereen wijst tegelijk. Meeste stemmen krijgt 1 punt."],
+["Wie van ons?","Wie zou per ongeluk viraal gaan op internet?","Iedereen wijst tegelijk. Meeste stemmen krijgt 1 punt."],
+["Wie van ons?","Wie kan het slechtst een geheim bewaren?","Iedereen wijst tegelijk. Meeste stemmen krijgt 1 punt."],
+["Wie van ons?","Wie zou een week overleven zonder telefoon?","Iedereen wijst tegelijk. Meeste stemmen krijgt 1 punt."],
+["Wie van ons?","Wie wordt later waarschijnlijk beroemd?","Iedereen wijst tegelijk. Meeste stemmen krijgt 1 punt."],
+["Wie van ons?","Wie zou het eerst spontaan op vakantie vertrekken?","Iedereen wijst tegelijk. Meeste stemmen krijgt 1 punt."]
+],
+act:[
+["Doe maar na","Beeld een pinguïn uit die te laat op zijn werk komt.","De rest heeft 30 seconden om te raden."],
+["Doe maar na","Doe alsof je een bekende zanger bent tijdens een dramatische finale.","De rest raadt wie of wat je uitbeeldt."],
+["Doe maar na","Beeld uit dat je op een LEGO-blokje stapt.","Zonder woorden!"],
+["Doe maar na","Speel een nieuwslezer die verslag doet van een ontplofte verjaardagstaart.","De groep geeft punten voor creativiteit."],
+["Doe maar na","Doe een dier na dat probeert indruk te maken.","De rest raadt het dier."]
+],
+challenge:[
+["Opdracht","Noem binnen 10 seconden 5 dingen die je op een festival ziet.","Gelukt? Verdien 2 punten."],
+["Opdracht","Doe een dansmove die de groep moet nadoen.","Iedereen doet mee. Bonuspunt voor de origineelste."],
+["Opdracht","Verzin ter plekke een reclameslogan voor je linkerbuur.","Je hebt 15 seconden."],
+["Opdracht","Probeer 20 seconden niet te lachen terwijl de groep gekke bekken trekt.","Gelukt? 2 punten."],
+["Opdracht","Noem drie films met een dier in de titel binnen 10 seconden.","Gelukt? Verdien 2 punten."],
+["Opdracht","Praat één ronde alsof je een sportcommentator bent.","Bonus voor overtuiging."]
+],
+bluff:[
+["Bluf of niet?","Vertel een verhaal van maximaal 20 seconden over iets dat je zogenaamd ooit hebt meegemaakt. Verzin het óf vertel de waarheid.","De groep stemt: waar of verzonnen? Verteller krijgt 1 punt als de groep fout raadt."],
+["Bluf of niet?","Noem drie ‘feitjes’ over jezelf. Eén ervan is verzonnen.","De groep raadt de leugen. 1 punt voor elke goede gokker."],
+["Bluf of niet?","Vertel met een stalen gezicht waarom jij ooit een prijs voor wereldkampioen slapen won.","De groep beslist of je overtuigend was."]
+],
+quiz:[
+["Mini-quiz","Hoeveel minuten zitten er in één dag?","Antwoord: 1440. Goed geraden? 1 punt."],
+["Mini-quiz","Wat is de hoofdstad van Australië?","Antwoord: Canberra. Goed geraden? 1 punt."],
+["Mini-quiz","Hoeveel zijden heeft een achthoek?","Antwoord: 8. Goed geraden? 1 punt."],
+["Mini-quiz","Welke planeet staat bekend als de rode planeet?","Antwoord: Mars. Goed geraden? 1 punt."],
+["Mini-quiz","Hoe heet het grootste zoogdier ter wereld?","Antwoord: de blauwe vinvis. Goed geraden? 1 punt."]
+]
+};
+const adultExtras=[
+["Ondeugende vraag","Wat is jouw meest onverwachte turn-on (zonder details als je dat liever niet deelt)?","Iedereen mag passen."],
+["Ondeugende vraag","Wie aan tafel heeft volgens jou de meeste charme?","Geef een compliment, geen beoordeling."],
+["Ondeugende opdracht","Flirt 15 seconden met een denkbeeldige plant alsof het je grote liefde is.","Maak het theatraal."]
+];
+const specialDeck=[
+{type:"double",title:"🔥 DUBBELE PUNTEN",prompt:"Deze opdracht levert dubbele punten op!",hint:"Voltooi deze opdracht en druk daarna op de puntenknop. Je krijgt 2 punten. Doe dit vóór je een nieuwe kaart trekt."},
+{type:"team",title:"👥 IEDEREEN TEGEN ÉÉN",prompt:"De speler die nu aan de beurt is, is de uitdager. Alle andere spelers vormen samen het team en bedenken een korte, leuke uitdaging.",hint:"Lukt het de uitdager? Druk op ‘Uitdager +2’. Lukt het niet? Dan krijgt iedere teamspeler 1 punt."},
+{type:"secret",title:"🤫 GEHEIME OPDRACHT",prompt:"Je krijgt een missie die niemand anders mag zien. Laat alleen de speler die aan de beurt is op ‘Toon geheime opdracht’ drukken.",hint:"Voer je missie ongemerkt uit. Bij je volgende beurt kun je aangeven of het gelukt is: dat levert 2 punten op."}
+];
+const secretMissions=[
+"Laat iemand anders spontaan ‘wat?’ zeggen zonder dat die doorheeft waarom.",
+"Verwerk het woord ‘ananas’ natuurlijk in een gesprek.",
+"Zorg dat iemand jou een high-five geeft.",
+"Laat iemand binnen twee minuten lachen zonder een grap te vertellen.",
+"Vraag iemand om advies over een totaal onbelangrijk onderwerp."
+];
+let players=[],scores={},turn=0,round=1,maxRounds=15,selected="random",mood="mix",lastCard=null,used={};
+let soundOn=true,audioCtx=null,pointMultiplier=1,activeSpecial=null,wheelRotation=0,pendingMissions=[];
+const $=id=>document.getElementById(id);
+function toast(msg){$("toast").textContent=msg;$("toast").classList.remove("hidden");setTimeout(()=>$("toast").classList.add("hidden"),2100)}
+function renderPlayers(){const el=$("playerList");el.innerHTML="";players.forEach((p,i)=>{let chip=document.createElement("span");chip.className="player-chip";chip.textContent=p+" ";let x=document.createElement("button");x.textContent="×";x.title="Verwijder "+p;x.onclick=()=>{players.splice(i,1);renderPlayers()};chip.append(x);el.append(chip)});if(!players.length)el.innerHTML='<span class="muted">Voeg minimaal 2 spelers toe.</span>';$("start").disabled=players.length<2||players.length>12}
+function addPlayer(){let name=$("playerName").value.trim();if(!name)return;if(players.length>=12){toast("Maximaal 12 spelers.");return}if(players.some(p=>p.toLowerCase()===name.toLowerCase())){toast("Deze naam staat er al.");return}players.push(name);$("playerName").value="";renderPlayers()}
+$("addPlayer").onclick=addPlayer;$("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});
+$("demo").onclick=()=>{players=["Alex","Sam","Jamie","Noa"];renderPlayers();toast("Demo-spelers toegevoegd!")};
+function startGame(){mood=$("mood").value;maxRounds=+$("rounds").value;turn=0;round=1;scores={};players.forEach(p=>scores[p]=0);used={};pointMultiplier=1;activeSpecial=null;pendingMissions=[];$("award").textContent="+1 punt voor huidige speler";resetSpecialControls();$("wheelResult").textContent="Draai aan het rad voor een willekeurige categorie.";$("setup").classList.add("hidden");$("results").classList.add("hidden");$("game").classList.remove("hidden");renderGame();newCard()}
+$("start").onclick=startGame;
+function renderGame(){$("roundNum").textContent=round;$("currentName").textContent=players[turn];$("turnTitle").textContent="Jij bent aan de beurt!";$("scores").innerHTML="";players.forEach((p,i)=>{let d=document.createElement("div");d.className="score"+(i===turn?" current":"");d.innerHTML="<b></b><small></small>";d.querySelector("b").textContent=p;d.querySelector("small").textContent=(scores[p]||0)+" punten";$("scores").append(d)});$("roundInfo").textContent=maxRounds?`Ronde ${round} van ${maxRounds}`:`Ronde ${round} · Vrij spelen`;renderMissionControls()}
+function setCategory(cat){selected=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat))}
+document.querySelectorAll(".cat").forEach(b=>b.onclick=()=>setCategory(b.dataset.cat));
+function chooseDeck(){let cats=selected==="random"?Object.keys(decks):[selected];let pool=[];cats.forEach(c=>(decks[c]||[]).forEach((card,i)=>{let key=c+"-"+i;if(!used[key])pool.push({card,key})}));if(mood==="adult"&&selected!=="who"&&selected!=="quiz")adultExtras.forEach((card,i)=>{let key="adult-"+i;if(!used[key])pool.push({card,key})});if(!pool.length){used={};return chooseDeck()}return pool[Math.floor(Math.random()*pool.length)]}
+function newCard(){let item=chooseDeck();used[item.key]=true;lastCard=item.card;activeSpecial=null;pointMultiplier=1;$("award").textContent="+1 punt voor huidige speler";resetSpecialControls();const visualCard=document.querySelector(".card");visualCard.classList.remove("card-pop");void visualCard.offsetWidth;visualCard.classList.add("card-pop");$("cardCat").textContent=item.card[0];$("prompt").textContent=item.card[1];$("hint").textContent=item.card[2];$("timer").classList.add("hidden");$("draw").textContent="Nieuwe kaart ✨";renderMissionControls();playSound("card")}
+function resetSpecialControls(){$("teamWin").classList.add("hidden");$("challengerWin").classList.add("hidden");$("teamWin").disabled=false;$("challengerWin").disabled=false;$("revealSecret").classList.add("hidden");$("secretWin").classList.add("hidden");$("missionFail").classList.add("hidden");$("revealSecret").disabled=false;$("secretBox").classList.remove("show")}
+function renderMissionControls(){const mission=pendingMissions.find(m=>m.owner===players[turn]);$("revealSecret").classList.add("hidden");$("secretWin").classList.add("hidden");$("missionFail").classList.add("hidden");$("secretBox").classList.remove("show");if(!mission)return;$("revealSecret").classList.remove("hidden");$("revealSecret").disabled=false;$("revealSecret").textContent=mission.revealed?"🔒 Verberg geheime opdracht":"🤫 Toon geheime opdracht";if(mission.revealed){$("secretText").textContent=mission.text;$("secretBox").classList.add("show")}if(round>mission.createdRound){$("secretWin").classList.remove("hidden");$("missionFail").classList.remove("hidden")}}
+function showSpecialCard(){const card=specialDeck[Math.floor(Math.random()*specialDeck.length)];if(card.type==="secret"&&pendingMissions.some(m=>m.owner===players[turn])){toast("Je hebt nog een openstaande geheime opdracht. Rond die eerst af.");return}activeSpecial=card.type;pointMultiplier=card.type==="double"?2:1;resetSpecialControls();$("award").textContent=pointMultiplier===2?"+2 punten voor huidige speler":"+1 punt voor huidige speler";$("cardCat").textContent=card.title;$("prompt").textContent=card.prompt;$("hint").textContent=card.hint;const visualCard=document.querySelector(".card");visualCard.classList.remove("card-pop");void visualCard.offsetWidth;visualCard.classList.add("card-pop");if(card.type==="team"){$("teamWin").classList.remove("hidden");$("challengerWin").classList.remove("hidden")}if(card.type==="secret"){pendingMissions.push({owner:players[turn],text:secretMissions[Math.floor(Math.random()*secretMissions.length)],createdRound:round,revealed:false});renderMissionControls()}else{renderMissionControls()}playSound("special");toast("Speciale kaart getrokken!")}
+$("draw").onclick=newCard;$("specialDraw").onclick=showSpecialCard;$("skip").onclick=()=>{toast("Kaart overgeslagen — geen probleem!");nextTurn()};
+$("award").onclick=()=>{let points=pointMultiplier;scores[players[turn]]+=points;pointMultiplier=1;$("award").textContent="+1 punt voor huidige speler";renderGame();toast("+"+points+" punten voor "+players[turn]);playSound("score")};
+$("minus").onclick=()=>{scores[players[turn]]=Math.max(0,scores[players[turn]]-1);renderGame();toast("Punt aangepast")};
+$("teamWin").onclick=()=>{if($("teamWin").disabled)return;players.forEach(p=>{if(p!==players[turn])scores[p]=(scores[p]||0)+1});renderGame();toast("Iedere teamspeler krijgt 1 punt!");playSound("score");$("teamWin").disabled=true;$("challengerWin").disabled=true};
+$("challengerWin").onclick=()=>{if($("challengerWin").disabled)return;scores[players[turn]]+=2;renderGame();toast(players[turn]+" krijgt 2 punten!");playSound("score");$("teamWin").disabled=true;$("challengerWin").disabled=true};
+$("revealSecret").onclick=()=>{const mission=pendingMissions.find(m=>m.owner===players[turn]);if(!mission)return;mission.revealed=!mission.revealed;renderMissionControls();playSound("secret")};
+$("secretWin").onclick=()=>{const index=pendingMissions.findIndex(m=>m.owner===players[turn]&&round>m.createdRound);if(index<0)return;scores[players[turn]]+=2;pendingMissions.splice(index,1);renderGame();toast("Geheime missie gelukt: +2 punten!");playSound("score")};
+$("missionFail").onclick=()=>{const index=pendingMissions.findIndex(m=>m.owner===players[turn]&&round>m.createdRound);if(index<0)return;pendingMissions.splice(index,1);renderGame();toast("Geheime missie afgesloten. Volgende keer beter!")};
+$("next").onclick=nextTurn;
+function nextTurn(){turn++;if(turn>=players.length){turn=0;round++}if(maxRounds&&round>maxRounds){finish();return}renderGame();newCard();playSound("next")}
+function playSound(kind="tap"){
+  if(!soundOn)return;
+  try{
+    const AudioContext=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContext)return;
+    audioCtx=audioCtx||new AudioContext();
+    if(audioCtx.state==="suspended")audioCtx.resume();
+    const now=audioCtx.currentTime;
+    const notes=kind==="special"?[440,660,880]:kind==="score"?[523,659,784]:kind==="card"?[440,620]:kind==="secret"?[330,494]:kind==="wheel"?[392,523,659]:[330,440];
+    notes.forEach((freq,i)=>{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type="sine";osc.frequency.value=freq;gain.gain.setValueAtTime(.0001,now+i*.09);gain.gain.exponentialRampToValueAtTime(.075,now+i*.09+.02);gain.gain.exponentialRampToValueAtTime(.0001,now+i*.09+.17);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now+i*.09);osc.stop(now+i*.09+.19)});
+  }catch(e){/* Audio is optional; the game remains playable without it. */}
+}
+$("soundToggle").onclick=()=>{soundOn=!soundOn;$("soundToggle").textContent=soundOn?"🔊 Geluid: aan":"🔇 Geluid: uit";$("soundToggle").setAttribute("aria-pressed",String(soundOn));if(soundOn)playSound("tap");toast(soundOn?"Geluid ingeschakeld":"Geluid uitgeschakeld")};
+const wheelCategories=["truth","who","act","challenge","bluff","quiz","random"];
+const wheelNames={truth:"Truth or Dare",who:"Wie van ons?",act:"Doe maar na",challenge:"Gekke opdracht",bluff:"Bluffen",quiz:"Mini-quiz",random:"Verrassing"};
+$("spinWheel").onclick=()=>{
+  const wheel=$("wheel");wheel.classList.add("spinning");
+  const chosen=wheelCategories[Math.floor(Math.random()*wheelCategories.length)];
+  wheelRotation+=1440+Math.floor(Math.random()*360);
+  wheel.style.transform=`rotate(${wheelRotation}deg)`;
+  $("spinWheel").disabled=true;playSound("wheel");
+  setTimeout(()=>{wheel.classList.remove("spinning");$("spinWheel").disabled=false;setCategory(chosen);$("wheelResult").textContent="Het rad koos: "+wheelNames[chosen]+"!";newCard();toast("Het rad koos "+wheelNames[chosen]+"!")},1400);
+};
+function launchConfetti(){const colors=["#ff4fa3","#9167ff","#53d7e8","#62e6ad","#ffd166"];for(let i=0;i<75;i++){const piece=document.createElement("i");piece.className="confetti";piece.style.left=Math.random()*100+"vw";piece.style.background=colors[Math.floor(Math.random()*colors.length)];piece.style.animationDelay=Math.random()*.65+"s";piece.style.setProperty("--drift",(Math.random()*260-130)+"px");piece.style.transform=`rotate(${Math.random()*180}deg)`;document.body.append(piece);setTimeout(()=>piece.remove(),3600)}}
+function finish(){ launchConfetti();playSound("special"); $("game").classList.add("hidden");$("results").classList.remove("hidden");let sorted=[...players].sort((a,b)=>scores[b]-scores[a]);$("winner").textContent=sorted.length&&scores[sorted[0]]>0?"🏆 "+sorted[0]+" wint!":"🏆 Goed gespeeld, allemaal!";$("finalScores").innerHTML="";sorted.forEach((p,i)=>{let d=document.createElement("div");d.className="score";d.style.margin="8px 0";d.style.display="flex";d.style.justifyContent="space-between";let a=document.createElement("b");a.textContent=(i+1)+". "+p;let b=document.createElement("strong");b.textContent=scores[p]+" punten";d.append(a,b);$("finalScores").append(d)})}
+$("endGame").onclick=finish;$("again").onclick=()=>{startGame()};$("home").onclick=()=>{$("results").classList.add("hidden");$("setup").classList.remove("hidden")};
+</script>
+</body></html>
