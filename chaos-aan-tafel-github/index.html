@@ -33,6 +33,13 @@ body:after{opacity:.2;filter:blur(1px);animation-duration:27s;animation-directio
 .btn:not(:disabled):active{transform:scale(.97)}
 .score.current{box-shadow:0 0 20px #53d7e833;animation:scorePulse 1.8s ease-in-out infinite}
 @keyframes scorePulse{50%{box-shadow:0 0 25px #53d7e855}}
+.score{position:relative}
+.score.score-awarded{animation:scoreAward .7s ease-out}
+@keyframes scoreAward{35%{transform:translateY(-5px) scale(1.08);box-shadow:0 0 28px #ffd166aa;border-color:#ffd166}100%{transform:translateY(0) scale(1)}}
+.score-gain{position:absolute;top:3px;right:8px;color:#ffd166;font-size:16px;font-weight:1000;text-shadow:0 2px 8px #000b;pointer-events:none;animation:floatPoints .9s ease-out forwards}
+@keyframes floatPoints{to{opacity:0;transform:translateY(-24px) scale(1.25)}}
+.score-spark{position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;pointer-events:none;animation:scoreSpark .55s ease-out forwards}
+@keyframes scoreSpark{to{opacity:0;transform:translate(var(--spark-x),var(--spark-y)) scale(.2)}}
 .confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:30;pointer-events:none;animation:confettiFall 2.7s ease-in forwards;border-radius:2px}
 @keyframes confettiFall{to{transform:translate3d(var(--drift),110vh,0) rotate(760deg);opacity:.1}}
 .toast{animation:toastIn .25s ease-out both}@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -186,7 +193,27 @@ $("addPlayer").onclick=addPlayer;$("playerName").addEventListener("keydown",e=>{
 $("demo").onclick=()=>{players=["Alex","Sam","Jamie","Noa"];renderPlayers();toast("Demo-spelers toegevoegd!")};
 function startGame(){mood=$("mood").value;maxRounds=+$("rounds").value;turn=0;round=1;scores={};players.forEach(p=>scores[p]=0);used={};pointMultiplier=1;activeSpecial=null;pendingMissions=[];$("award").textContent="+1 punt voor huidige speler";resetSpecialControls();$("wheelResult").textContent="Draai aan het rad voor een willekeurige categorie.";$("setup").classList.add("hidden");$("results").classList.add("hidden");$("game").classList.remove("hidden");renderGame();newCard()}
 $("start").onclick=startGame;
-function renderGame(){$("roundNum").textContent=round;$("currentName").textContent=players[turn];$("turnTitle").textContent="Jij bent aan de beurt!";$("scores").innerHTML="";players.forEach((p,i)=>{let d=document.createElement("div");d.className="score"+(i===turn?" current":"");d.innerHTML="<b></b><small></small>";d.querySelector("b").textContent=p;d.querySelector("small").textContent=(scores[p]||0)+" punten";$("scores").append(d)});$("roundInfo").textContent=maxRounds?`Ronde ${round} van ${maxRounds}`:`Ronde ${round} · Vrij spelen`;renderMissionControls()}
+function renderGame(){$("roundNum").textContent=round;$("currentName").textContent=players[turn];$("turnTitle").textContent="Jij bent aan de beurt!";$("scores").innerHTML="";players.forEach((p,i)=>{let d=document.createElement("div");d.className="score"+(i===turn?" current":"");d.dataset.player=p;d.innerHTML="<b></b><small></small>";d.querySelector("b").textContent=p;d.querySelector("small").textContent=(scores[p]||0)+" punten";$("scores").append(d)});$("roundInfo").textContent=maxRounds?`Ronde ${round} van ${maxRounds}`:`Ronde ${round} · Vrij spelen`;renderMissionControls()}
+function celebratePoints(changes){
+  Object.entries(changes).forEach(([player,points])=>{
+    const score=[...$("scores").querySelectorAll(".score")].find(el=>el.dataset.player===player);
+    if(!score)return;
+    score.classList.remove("score-awarded");void score.offsetWidth;score.classList.add("score-awarded");
+    const clearAward=event=>{if(event.target===score){score.classList.remove("score-awarded");score.removeEventListener("animationend",clearAward)}};
+    score.addEventListener("animationend",clearAward);
+    const gain=document.createElement("span");gain.className="score-gain";gain.textContent="+"+points;score.append(gain);
+    gain.addEventListener("animationend",()=>gain.remove(),{once:true});
+    for(let i=0;i<6;i++){
+      const spark=document.createElement("i");spark.className="score-spark";
+      spark.style.background=["#ff4fa3","#9167ff","#53d7e8","#62e6ad","#ffd166"][i%5];
+      const angle=Math.PI*2*i/6;
+      spark.style.setProperty("--spark-x",Math.cos(angle)*32+"px");spark.style.setProperty("--spark-y",Math.sin(angle)*24+"px");
+      score.append(spark);spark.addEventListener("animationend",()=>spark.remove(),{once:true});
+    }
+  });
+  launchConfetti();
+  playSound("score");
+}
 function setCategory(cat){selected=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat))}
 document.querySelectorAll(".cat").forEach(b=>b.onclick=()=>setCategory(b.dataset.cat));
 function chooseDeck(){let cats=selected==="random"?Object.keys(decks):[selected];let pool=[];cats.forEach(c=>(decks[c]||[]).forEach((card,i)=>{let key=c+"-"+i;if(!used[key])pool.push({card,key})}));if(mood==="adult"&&selected!=="who"&&selected!=="quiz")adultExtras.forEach((card,i)=>{let key="adult-"+i;if(!used[key])pool.push({card,key})});if(!pool.length){used={};return chooseDeck()}return pool[Math.floor(Math.random()*pool.length)]}
@@ -195,12 +222,12 @@ function resetSpecialControls(){$("teamWin").classList.add("hidden");$("challeng
 function renderMissionControls(){const mission=pendingMissions.find(m=>m.owner===players[turn]);$("revealSecret").classList.add("hidden");$("secretWin").classList.add("hidden");$("missionFail").classList.add("hidden");$("secretBox").classList.remove("show");if(!mission)return;$("revealSecret").classList.remove("hidden");$("revealSecret").disabled=false;$("revealSecret").textContent=mission.revealed?"🔒 Verberg geheime opdracht":"🤫 Toon geheime opdracht";if(mission.revealed){$("secretText").textContent=mission.text;$("secretBox").classList.add("show")}if(round>mission.createdRound){$("secretWin").classList.remove("hidden");$("missionFail").classList.remove("hidden")}}
 function showSpecialCard(){const card=specialDeck[Math.floor(Math.random()*specialDeck.length)];if(card.type==="secret"&&pendingMissions.some(m=>m.owner===players[turn])){toast("Je hebt nog een openstaande geheime opdracht. Rond die eerst af.");return}activeSpecial=card.type;pointMultiplier=card.type==="double"?2:1;resetSpecialControls();$("award").textContent=pointMultiplier===2?"+2 punten voor huidige speler":"+1 punt voor huidige speler";$("cardCat").textContent=card.title;$("prompt").textContent=card.prompt;$("hint").textContent=card.hint;const visualCard=document.querySelector(".card");visualCard.classList.remove("card-pop");void visualCard.offsetWidth;visualCard.classList.add("card-pop");if(card.type==="team"){$("teamWin").classList.remove("hidden");$("challengerWin").classList.remove("hidden")}if(card.type==="secret"){pendingMissions.push({owner:players[turn],text:secretMissions[Math.floor(Math.random()*secretMissions.length)],createdRound:round,revealed:false});renderMissionControls()}else{renderMissionControls()}playSound("special");toast("Speciale kaart getrokken!")}
 $("draw").onclick=newCard;$("specialDraw").onclick=showSpecialCard;$("skip").onclick=()=>{toast("Kaart overgeslagen — geen probleem!");nextTurn()};
-$("award").onclick=()=>{let points=pointMultiplier;scores[players[turn]]+=points;pointMultiplier=1;$("award").textContent="+1 punt voor huidige speler";renderGame();toast("+"+points+" punten voor "+players[turn]);playSound("score")};
+$("award").onclick=()=>{let points=pointMultiplier;scores[players[turn]]+=points;pointMultiplier=1;$("award").textContent="+1 punt voor huidige speler";renderGame();celebratePoints({[players[turn]]:points});toast("+"+points+" punten voor "+players[turn])};
 $("minus").onclick=()=>{scores[players[turn]]=Math.max(0,scores[players[turn]]-1);renderGame();toast("Punt aangepast")};
-$("teamWin").onclick=()=>{if($("teamWin").disabled)return;players.forEach(p=>{if(p!==players[turn])scores[p]=(scores[p]||0)+1});renderGame();toast("Iedere teamspeler krijgt 1 punt!");playSound("score");$("teamWin").disabled=true;$("challengerWin").disabled=true};
-$("challengerWin").onclick=()=>{if($("challengerWin").disabled)return;scores[players[turn]]+=2;renderGame();toast(players[turn]+" krijgt 2 punten!");playSound("score");$("teamWin").disabled=true;$("challengerWin").disabled=true};
+$("teamWin").onclick=()=>{if($("teamWin").disabled)return;const changes={};players.forEach(p=>{if(p!==players[turn]){scores[p]=(scores[p]||0)+1;changes[p]=1}});renderGame();celebratePoints(changes);toast("Iedere teamspeler krijgt 1 punt!");$("teamWin").disabled=true;$("challengerWin").disabled=true};
+$("challengerWin").onclick=()=>{if($("challengerWin").disabled)return;scores[players[turn]]+=2;renderGame();celebratePoints({[players[turn]]:2});toast(players[turn]+" krijgt 2 punten!");$("teamWin").disabled=true;$("challengerWin").disabled=true};
 $("revealSecret").onclick=()=>{const mission=pendingMissions.find(m=>m.owner===players[turn]);if(!mission)return;mission.revealed=!mission.revealed;renderMissionControls();playSound("secret")};
-$("secretWin").onclick=()=>{const index=pendingMissions.findIndex(m=>m.owner===players[turn]&&round>m.createdRound);if(index<0)return;scores[players[turn]]+=2;pendingMissions.splice(index,1);renderGame();toast("Geheime missie gelukt: +2 punten!");playSound("score")};
+$("secretWin").onclick=()=>{const index=pendingMissions.findIndex(m=>m.owner===players[turn]&&round>m.createdRound);if(index<0)return;scores[players[turn]]+=2;pendingMissions.splice(index,1);renderGame();celebratePoints({[players[turn]]:2});toast("Geheime missie gelukt: +2 punten!")};
 $("missionFail").onclick=()=>{const index=pendingMissions.findIndex(m=>m.owner===players[turn]&&round>m.createdRound);if(index<0)return;pendingMissions.splice(index,1);renderGame();toast("Geheime missie afgesloten. Volgende keer beter!")};
 $("next").onclick=nextTurn;
 function nextTurn(){turn++;if(turn>=players.length){turn=0;round++}if(maxRounds&&round>maxRounds){finish();return}renderGame();newCard();playSound("next")}
@@ -212,8 +239,8 @@ function playSound(kind="tap"){
     audioCtx=audioCtx||new AudioContext();
     if(audioCtx.state==="suspended")audioCtx.resume();
     const now=audioCtx.currentTime;
-    const notes=kind==="special"?[440,660,880]:kind==="score"?[523,659,784]:kind==="card"?[440,620]:kind==="secret"?[330,494]:kind==="wheel"?[392,523,659]:[330,440];
-    notes.forEach((freq,i)=>{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type="sine";osc.frequency.value=freq;gain.gain.setValueAtTime(.0001,now+i*.09);gain.gain.exponentialRampToValueAtTime(.075,now+i*.09+.02);gain.gain.exponentialRampToValueAtTime(.0001,now+i*.09+.17);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now+i*.09);osc.stop(now+i*.09+.19)});
+    const notes=kind==="special"?[440,660,880]:kind==="score"?[523,659,784,1047]:kind==="card"?[440,620]:kind==="secret"?[330,494]:kind==="wheel"?[392,523,659]:[330,440];
+    notes.forEach((freq,i)=>{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),start=now+i*(kind==="score"?.075:.09),duration=kind==="score"?.22:.17;osc.type=kind==="score"?"triangle":"sine";osc.frequency.value=freq;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(kind==="score"?.09:.075,start+.02);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(start);osc.stop(start+duration+.02)});
   }catch(e){/* Audio is optional; the game remains playable without it. */}
 }
 $("soundToggle").onclick=()=>{soundOn=!soundOn;$("soundToggle").textContent=soundOn?"🔊 Geluid: aan":"🔇 Geluid: uit";$("soundToggle").setAttribute("aria-pressed",String(soundOn));if(soundOn)playSound("tap");toast(soundOn?"Geluid ingeschakeld":"Geluid uitgeschakeld")};
